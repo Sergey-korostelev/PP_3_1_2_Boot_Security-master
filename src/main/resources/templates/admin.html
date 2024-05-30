@@ -79,7 +79,7 @@
                         <nav class="navbar navbar-light bg-light">
                             <span class="navbar-brand mb-0 h1">Add new user</span>
                         </nav>
-                        <div class="mx-auto" style="width: 300px">
+                        <div th:object="${roles}" class="mx-auto" style="width: 300px">
                             <form th:method="POST" th:action="@{/saveUser}" th:object="${new_user}">
                                 <div class="form-group">
                                     <label for="exampleFormControlInput1">Username</label>

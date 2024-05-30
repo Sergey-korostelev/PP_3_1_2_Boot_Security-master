@@ -1,6 +1,7 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -10,19 +11,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 public class UserController {
     @Autowired
-    private final UserService service;
+    private final UserService userService;
+    private final RoleService roleService;
 
-    public UserController(UserService service) {
-        this.service = service;
+    public UserController(UserService service, RoleService roleService) {
+        this.userService = service;
+        this.roleService = roleService;
     }
 
 
@@ -33,7 +39,7 @@ public class UserController {
 
     @GetMapping(value = "/user")
     public String showUser(Principal principal, Model model) {
-        for (User user : service.findAll()) {
+        for (User user : userService.findAll()) {
             if (user.getUsername().equals(principal.getName())) {
                 model.addAttribute("userId", user);
                 return "user";
@@ -45,12 +51,13 @@ public class UserController {
 
     @GetMapping(value = "/admin")
     public String showAdmin(ModelMap model, Principal principal) {
-        for (User user : service.findAll()) {
+        for (User user : userService.findAll()) {
             if (user.getUsername().equals(principal.getName())) {
                 model.addAttribute("userId", user);
             }
         }
-        model.addAttribute("users", service.findAll());
+        model.addAttribute("roles", roleService.findAll());
+        model.addAttribute("users", userService.findAll());
         model.addAttribute("new_user", new User());
         model.addAttribute("new_user_role", new Role());
         return "admin";
@@ -58,15 +65,15 @@ public class UserController {
 
     @PostMapping(value = "/saveUser")
     public String saveUser(@ModelAttribute("new_user") User user, @ModelAttribute("new_user_role") Role role) {
-        List<Role> list = new ArrayList<>();
-        list.add(role);
-        service.saveUser(new User(user.getUsername(), user.getPassword(), list));
+        Set<Role> set = new HashSet<>();
+        set.add(role);
+        userService.saveUser(new User(user.getUsername(), user.getPassword(), set));
         return "redirect:/admin";
     }
 
     @GetMapping(value = "/admin/edit")
     public String getUserEdit(Model model, @RequestParam long id) {
-        User userId = service.findById(id).get();
+        User userId = userService.findById(id).get();
         model.addAttribute("userId", userId);
         Role role = new Role(userId.getRoles().toString());
         model.addAttribute("new_user_role", role);
@@ -74,16 +81,16 @@ public class UserController {
     }
     @PostMapping(value = "/update")
     public String editUser(@ModelAttribute("new_user") User user, @ModelAttribute("new_user_role") Role role) {
-        List<Role> list = new ArrayList<>();
-        list.add(role);
-        user.setRoles(list);
-        service.mergeUser(user);
+        Set<Role> set = new HashSet<>();
+        set.add(role);
+        user.setRoles(set);
+        userService.mergeUser(user);
         return "redirect:/admin";
     }
 
     @GetMapping(value = "/admin/delete")
     public String getUserDelete(Model model, @RequestParam long id) {
-        User userId = service.findById(id).get();
+        User userId = userService.findById(id).get();
         model.addAttribute("userId", userId);
         Role role = new Role(userId.getRoles().toString());
         model.addAttribute("new_user_role", role);
@@ -91,7 +98,7 @@ public class UserController {
     }
     @PostMapping(value = "/delete")
     public String deleteUser(@ModelAttribute("new_user") User user) {
-        service.deleteById(user.getId());
+        userService.deleteById(user.getId());
         return "redirect:/admin";
     }
 

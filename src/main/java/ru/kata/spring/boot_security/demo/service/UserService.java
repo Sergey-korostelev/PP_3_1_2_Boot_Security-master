@@ -7,10 +7,14 @@ import java.util.Optional;
 
 public interface UserService {
 
-    public Optional<User> findById(Long id);
-    public List<User> findAll();
-    public void saveUser(User user);
-    public void deleteById (Long id);
-    public void mergeUser(User userId);
+    Optional<User> findById(Long id);
+
+    List<User> findAll();
+
+    void saveUser(User user);
+
+    void deleteById(Long id);
+
+    void mergeUser(User userId);
 
 }

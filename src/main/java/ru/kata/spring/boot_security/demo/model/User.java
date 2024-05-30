@@ -1,10 +1,8 @@
 package ru.kata.spring.boot_security.demo.model;
 
-
-
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.Assert;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -17,8 +15,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Entity
@@ -39,15 +43,62 @@ public class User implements UserDetails {
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Collection<Role> roles;
+    private Set<Role> authorities;
+
+    private  boolean accountNonExpired;
+
+    private  boolean accountNonLocked;
+
+    private  boolean credentialsNonExpired;
+
+    private boolean enabled;
 
     public User() {
     }
 
-    public User(String username, String password, Collection<Role> roles) {
+    public User(String username, String password, Set<? extends GrantedAuthority> authorities) {
         this.username = username;
         this.password = password;
-        this.roles = roles;
+        this.authorities = (Set<Role>) authorities;
+    }
+
+    public User(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        this(username, password, true, true, true, true, authorities);
+    }
+    public User(String username, String password, boolean enabled, boolean accountNonExpired,
+                boolean credentialsNonExpired, boolean accountNonLocked,
+                Collection<? extends GrantedAuthority> authorities) {
+        Assert.isTrue(username != null && !"".equals(username) && password != null,
+                "Cannot pass null or empty values to constructor");
+        this.username = username;
+        this.password = password;
+        this.enabled = enabled;
+        this.accountNonExpired = accountNonExpired;
+        this.credentialsNonExpired = credentialsNonExpired;
+        this.accountNonLocked = accountNonLocked;
+        this.authorities = Collections.unmodifiableSet(sortAuthorities(authorities));
+    }
+
+    private static SortedSet<Role> sortAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        Assert.notNull(authorities, "Cannot pass a null GrantedAuthority collection");
+        SortedSet<Role> sortedAuthorities = new TreeSet<>(new AuthorityComparator());
+        for (GrantedAuthority grantedAuthority : authorities) {
+            Assert.notNull(grantedAuthority, "GrantedAuthority list cannot contain any null elements");
+            sortedAuthorities.add((Role) grantedAuthority);
+        }
+        return sortedAuthorities;
+    }
+    private static class AuthorityComparator implements Comparator<GrantedAuthority>, Serializable {
+        @Override
+        public int compare(GrantedAuthority g1, GrantedAuthority g2) {
+            if (g2.getAuthority() == null) {
+                return -1;
+            }
+            if (g1.getAuthority() == null) {
+                return 1;
+            }
+            return g1.getAuthority().compareTo(g2.getAuthority());
+        }
     }
 
     public Long getId() {
@@ -66,47 +117,47 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public Collection<Role> getRoles() {
-        return roles;
+    public Set<Role> getRoles() {
+        return authorities;
     }
 
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
+    public void setRoles(Set<Role> roles) {
+        this.authorities = roles;
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream().map(x -> new SimpleGrantedAuthority(x.getAuthority())).collect(Collectors.toList());
+    public Collection<GrantedAuthority> getAuthorities() {
+        return authorities.stream().map(x -> new Role(x.getAuthority())).collect(Collectors.toList());
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return this.accountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return this.accountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return this.credentialsNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return this.enabled;
     }
 
     @Override
@@ -116,10 +167,14 @@ public class User implements UserDetails {
 
         User user = (User) o;
 
+        if (accountNonExpired != user.accountNonExpired) return false;
+        if (accountNonLocked != user.accountNonLocked) return false;
+        if (credentialsNonExpired != user.credentialsNonExpired) return false;
+        if (enabled != user.enabled) return false;
         if (!Objects.equals(id, user.id)) return false;
         if (!Objects.equals(username, user.username)) return false;
         if (!Objects.equals(password, user.password)) return false;
-        return Objects.equals(roles, user.roles);
+        return Objects.equals(authorities, user.authorities);
     }
 
     @Override
@@ -127,7 +182,11 @@ public class User implements UserDetails {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (username != null ? username.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (roles != null ? roles.hashCode() : 0);
+        result = 31 * result + (authorities != null ? authorities.hashCode() : 0);
+        result = 31 * result + (accountNonExpired ? 1 : 0);
+        result = 31 * result + (accountNonLocked ? 1 : 0);
+        result = 31 * result + (credentialsNonExpired ? 1 : 0);
+        result = 31 * result + (enabled ? 1 : 0);
         return result;
     }
 

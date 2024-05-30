@@ -11,24 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService {
     private final UserRepository dao;
 
     public UserServiceImpl(UserRepository dao) {
         this.dao = dao;
-    }
-
-    public User findByUsername(String username) {
-        return dao.findByUsername(username);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException(String.format("Not found user '%s'", username));
-        }
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), user.getAuthorities());
     }
 
     public Optional<User> findById(Long id) {
@@ -47,15 +34,5 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         dao.deleteById(id);
     }
 
-    public void mergeUser(User userId) {
-        User dbUser = findById(userId.getId()).orElse(null);
-        if (dbUser != null) {
-            dbUser.setUsername(userId.getUsername());
-            dbUser.setPassword(userId.getPassword());
-            dbUser.setRoles(userId.getRoles());
-            saveUser(dbUser);
-        }
-    }
-
-
+    public void mergeUser(User userId) { saveUser(userId); }
 }
