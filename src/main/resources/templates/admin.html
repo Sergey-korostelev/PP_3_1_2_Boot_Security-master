@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script type="text/javascript" src="../static/main.js" th:src="@{/main.js}"></script>
 
-    <title>Title</title>
 </head>
 <body>
 
@@ -22,7 +19,6 @@
 </nav>
 <br/>
 <br/>
-
 <div class="row">
     <div class="col-2">
         <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
@@ -66,9 +62,8 @@
                                     <td th:utext="${user.username}">Username</td>
                                     <td th:utext="${user.password}">Password</td>
                                     <td th:utext="${user.roles}">Role</td>
-                                    <td><a class="btn btn-primary btn-sm"
-                                           th:href="@{/admin/edit/(id=${user.id})}">Edit</a></td>
-                                    <td><a class="btn btn-danger btn-sm" th:href="@{/admin/delete/(id=${user.id})}">Delete</a>
+                                    <td><a id="href" th:href="@{/findOne/(id=${user.id})}" class="btn btn-primary eBtn">Edit</a></td>
+                                    <td><a id="href1" th:href="@{/findOne/(id=${user.id})}" class="btn btn-danger dBtn">Delete</a>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -89,18 +84,18 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="exampleFormControlInput2">Password</label>
+                                    <label for="password">Password</label>
                                     <input type="password" th:field="*{password}" class="form-control"
                                            id="exampleFormControlInput2"
-                                           placeholder="Password">
+                                           placeholder="Password" name="password" value=""/>
                                 </div>
 
-                                <div th:object="${new_user_role}" class="form-group">
+                                <div  th:object="${new_user_role}" class="form-group">
                                     <label for="exampleFormControlSelect1">Role</label>
                                     <select th:field="*{name}" multiple class="form-control"
                                             id="exampleFormControlSelect1">
-                                        <option value="ROLE_ADMIN">ADMIN</option>
-                                        <option value="ROLE_USER">USER</option>
+                                        <option th:value="${roles.get(0)}" >ADMIN</option>
+                                        <option th:value="${roles.get(1)}" >USER</option>
                                     </select>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Add new User</button>
@@ -144,6 +139,94 @@
 </div>
 
 
+<div class="myForm">
+    <form th:method="POST" th:action="@{/update}">
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edit user</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="id" class="col-form-label">Id:</label>
+                            <input type="text" class="form-control" id="id" name="id" value="" readonly/>
+                        </div>
+                        <div class="form-group">
+                            <label for="username" class="col-form-label">Username:</label>
+                            <input type="text" class="form-control" id="username" name="username" value=""/>
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="col-form-label">Password:</label>
+                            <input type="text" class="form-control" id="password" name="password" value=""/>
+                        </div>
+                        <div th:object="${new_user_role}" class="form-group">
+                            <label for="roles">Role</label>
+                            <select th:field="*{name}" multiple class="form-control" id="roles" name="roles" >
+                                <option id="sel1" th:value="${roles.get(0)}">ADMIN</option>
+                                <option id="sel2" th:value="${roles.get(1)}">USER</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <input type="submit" class="btn btn-primary" value="Edit" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="myForm1">
+    <form th:method="POST" th:action="@{/delete}" th:object="${new_user}">
+        <div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel1">Delete User</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="id1" class="col-form-label">Id:</label>
+                            <input type="text" th:field="*{id}" class="form-control" id="id1" name="id1" value="" readonly/>
+                        </div>
+                        <div class="form-group">
+                            <label for="username1" class="col-form-label">Username:</label>
+                            <input type="text" class="form-control" id="username1" name="username1" value="" readonly/>
+                        </div>
+                        <div class="form-group">
+                            <label for="password1" class="col-form-label">Password:</label>
+                            <input type="text" class="form-control" id="password1" name="password1" value="" readonly/>
+                        </div>
+                        <div class="form-group">
+                            <label for="roles1">Role</label>
+                            <select multiple class="form-control" id="roles1" name="roles1" readonly >
+                                <option id="sel3" th:value="${roles.get(0)}">ADMIN</option>
+                                <option id="sel4" th:value="${roles.get(1)}">USER</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <input type="submit" class="btn btn-danger" value="Delete" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"
@@ -155,6 +238,45 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
+<!--<script type="text/javascript" src="../static/main.js" th:src="@{/main.js}"></script>-->
+
+<script>
+    $(document).ready(function (){
+        $('.table .eBtn').on('click',function (event) {
+            event.preventDefault();
+            let href = $(this).attr('href');
+            /*alert(href);*/
+            $.get(href, function (user, status) {
+                $('.myForm #id').val(user.id);
+                $('.myForm #username').val(user.username);
+                $('.myForm #password').val(user.password);
+                $('.myForm #roles').val(user.roles);
+                /*$('.myForm #sel3').attr('value','ROLE_ADMIN');
+                $('.myForm #sel4').attr('value', );*/
+                /*$('.myForm #sel3').val('ROLE_ADMIN');
+                $('.myForm #sel4').val('ROLE_USER');*/
+            });
+            $('.myForm #exampleModal').modal()
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function (){
+        $('.table .dBtn').on('click',function (event) {
+            event.preventDefault();
+            let href1 = $(this).attr('href');
+            /*alert(href1);*/
+            $.get(href1, function (user, status) {
+                $('.myForm1 #id1').val(user.id);
+                $('.myForm1 #username1').val(user.username);
+                $('.myForm1 #password1').val(user.password);
+            });
+            $('.myForm1 #exampleModal1').modal()
+        });
+    });
+</script>
+
 
 
 </body>

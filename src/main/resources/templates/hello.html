@@ -14,7 +14,7 @@
     <h1 class="display-4">Hello user please login</h1>
     <p class="lead">If you can't walk, crawl.........</p>
     <hr class="my-4">
-    <p>Work is not a wolf, it cannot escape.</p>
+    <p class="lead2">Work is not a wolf, it cannot escape.</p>
     <form th:action="@{/login}" th:method="GET">
         <p class="lead">
             <button type="submit" class="btn btn-primary btn-lg">Login for you</button>
@@ -31,5 +31,13 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
+<script>
+    $(function (){
+        $('.btn').fadeTo(3000, 0.0001).fadeTo(3000,1);
+        $('.display-4').fadeTo(3000, 0.0001).fadeTo(3000,1);
+        $('.lead').fadeTo(3000, 0.0001).fadeTo(3000,1);
+        $('.lead2').fadeTo(3000, 0.0001).fadeTo(3000,1);
+    });
+</script>
 </body>
 </html>

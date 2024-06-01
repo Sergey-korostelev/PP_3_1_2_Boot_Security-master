@@ -1,24 +1,22 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 public class UserController {
@@ -65,42 +63,32 @@ public class UserController {
 
     @PostMapping(value = "/saveUser")
     public String saveUser(@ModelAttribute("new_user") User user, @ModelAttribute("new_user_role") Role role) {
-        Set<Role> set = new HashSet<>();
-        set.add(role);
-        userService.saveUser(new User(user.getUsername(), user.getPassword(), set));
+        if (role.getName() != null) {
+            Set<Role> set = Arrays.stream(role.getName().split(",")).map(Role::new).collect(Collectors.toSet());
+            userService.saveUser(new User(user.getUsername(), user.getPassword(), set));
+        }
         return "redirect:/admin";
     }
 
-    @GetMapping(value = "/admin/edit")
-    public String getUserEdit(Model model, @RequestParam long id) {
-        User userId = userService.findById(id).get();
-        model.addAttribute("userId", userId);
-        Role role = new Role(userId.getRoles().toString());
-        model.addAttribute("new_user_role", role);
-        return "edit";
+    @GetMapping("/findOne")
+    @ResponseBody
+    public User findOne(Long id) {
+        return userService.findById(id).get();
     }
+
     @PostMapping(value = "/update")
     public String editUser(@ModelAttribute("new_user") User user, @ModelAttribute("new_user_role") Role role) {
-        Set<Role> set = new HashSet<>();
-        set.add(role);
-        user.setRoles(set);
-        userService.mergeUser(user);
+        if (role.getName() != null) {
+            Set<Role> set = Arrays.stream(role.getName().split(",")).map(Role::new).collect(Collectors.toSet());
+            user.setRoles(set);
+        }
+        userService.saveUser(user);
         return "redirect:/admin";
     }
 
-    @GetMapping(value = "/admin/delete")
-    public String getUserDelete(Model model, @RequestParam long id) {
-        User userId = userService.findById(id).get();
-        model.addAttribute("userId", userId);
-        Role role = new Role(userId.getRoles().toString());
-        model.addAttribute("new_user_role", role);
-        return "delete";
-    }
     @PostMapping(value = "/delete")
     public String deleteUser(@ModelAttribute("new_user") User user) {
         userService.deleteById(user.getId());
         return "redirect:/admin";
     }
-
-
 }

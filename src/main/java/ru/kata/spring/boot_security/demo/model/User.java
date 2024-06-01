@@ -45,13 +45,13 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> authorities;
 
-    private  boolean accountNonExpired;
+    private boolean accountNonExpired = true;
 
-    private  boolean accountNonLocked;
+    private boolean accountNonLocked = true;
 
-    private  boolean credentialsNonExpired;
+    private boolean credentialsNonExpired = true;
 
-    private boolean enabled;
+    private boolean enabled = true;
 
     public User() {
     }
@@ -65,6 +65,7 @@ public class User implements UserDetails {
     public User(String username, String password, Collection<? extends GrantedAuthority> authorities) {
         this(username, password, true, true, true, true, authorities);
     }
+
     public User(String username, String password, boolean enabled, boolean accountNonExpired,
                 boolean credentialsNonExpired, boolean accountNonLocked,
                 Collection<? extends GrantedAuthority> authorities) {
@@ -88,6 +89,7 @@ public class User implements UserDetails {
         }
         return sortedAuthorities;
     }
+
     private static class AuthorityComparator implements Comparator<GrantedAuthority>, Serializable {
         @Override
         public int compare(GrantedAuthority g1, GrantedAuthority g2) {
@@ -117,7 +119,7 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
+    public Collection<Role> getRoles() {
         return authorities;
     }
 

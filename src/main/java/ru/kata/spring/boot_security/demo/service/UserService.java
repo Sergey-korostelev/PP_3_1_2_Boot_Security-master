@@ -15,6 +15,7 @@ public interface UserService {
 
     void deleteById(Long id);
 
-    void mergeUser(User userId);
+    Optional<User> findByUsername(String username);
 
+    long count();
 }
